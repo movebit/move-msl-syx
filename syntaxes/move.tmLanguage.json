@@ -35,9 +35,9 @@
             ]
         },
 
-        "macros": {
-            "name": "support.constant.macro.move",
-            "match": "#\\[(?:[\\w0-9=_\\(\\)\\s\"]+)\\]"
+        "attributes": {
+            "name": "support.constant.attribute.move",
+            "match": "#\\[(?:[\\w0-9=,_\\(\\)\\s\"\\:=]+)\\]"
         },
 
         "script": {
@@ -96,7 +96,7 @@
         "module": {
             "name": "meta.module.move",
             "comment": "Module definition",
-            "begin": "\\b(module)\\b",
+            "begin": "\\b(module|spec)\\b",
             "end": "(?<=})",
             "beginCaptures": {
                 "1": { "name": "storage.modifier.type.move" }
@@ -105,14 +105,15 @@
                 { "include": "#comments" },
                 {
                     "comment": "Module name",
-                    "begin": "(?<=module)",
+                    "begin": "(?<=(module|spec))",
                     "end": "(?={)",
                     "patterns": [
                         { "include": "#comments" },
+                        { "include": "#escaped_identifier" },
                         {
                             "comment": "Module namespace / address",
                             "name": "constant.other.move",
-                            "begin": "(?<=module)",
+                            "begin": "(?<=\\b(module|spec))",
                             "end": "(?=[(::){])"
                         },
                         {
@@ -130,21 +131,88 @@
                     "end": "}",
                     "patterns": [
                         { "include": "#comments" },
-                        { "include": "#macros" },
+                        { "include": "#attributes" },
+                        { "include": "#entry" },
+                        { "include": "#public-scope" },
+                        { "include": "#public" },
+                        { "include": "#native" },
                         { "include": "#import" },
                         { "include": "#friend" },
                         { "include": "#const" },
+
                         { "include": "#struct" },
-                        { "include": "#entry_fun" },
-                        { "include": "#native_fun" },
-                        { "include": "#public_fun" },
+                        { "include": "#has_ability" },
+
+                        { "include": "#enum" },
+                        { "include": "#macro" },
                         { "include": "#fun" },
-                        { "include": "#move_sign"},
-                        { "include": "#spec" },
-                        { "include": "#block" }
+                        { "include": "#spec" }
                     ]
                 }
             ]
+        },
+
+        "use_fun": {
+            "comment": "use { fun } internals",
+            "name": "meta.import.fun.move",
+            "begin": "\\b(fun)\\b",
+            "beginCaptures": {
+                "1": { "name": "storage.modifier.fun.move" }
+            },
+            "end": "(?=;)",
+            "patterns": [
+                { "include": "#comments" },
+                {
+                    "comment": "as keyword",
+                    "match": "\\b(as)\\b",
+                    "name": "keyword.control.as.move"
+                },
+                {
+                    "comment": "Self keyword",
+                    "match": "\\b(Self)\\b",
+                    "name": "variable.language.self.use.fun.move"
+                },
+                {
+                    "comment": "Function name",
+                    "name": "entity.name.function.use.move",
+                    "match": "\\b(_______[a-z][a-z_0-9]+)\\b"
+                },
+                { "include": "#types" },
+                { "include": "#escaped_identifier" },
+                { "include": "#capitalized" }
+            ]
+        },
+
+        "public-scope": {
+            "comment": "public (friend/script/package)",
+            "name": "meta.public.scoped.move",
+            "begin": "(?<=\\b(public))\\s*\\(",
+            "end": "\\)",
+            "patterns": [
+                { "include": "#comments" },
+                {
+                    "match": "\\b(friend|script|package)\\b",
+                    "name": "keyword.control.public.scope.move"
+                }
+            ]
+        },
+
+        "public": {
+            "comment": "public",
+            "match": "\\b(public)\\b",
+            "name": "storage.modifier.visibility.public.move"
+        },
+
+        "entry": {
+            "comment": "entry",
+            "match": "\\b(entry)\\b",
+            "name": "storage.modifier.visibility.entry.move"
+        },
+
+        "native": {
+            "comment": "native",
+            "match": "\\b(native)\\b",
+            "name": "storage.modifier.visibility.native.move"
         },
 
         "import": {
@@ -156,6 +224,7 @@
             "end": ";",
             "patterns": [
                 { "include": "#comments" },
+                { "include": "#use_fun" },
                 { "include": "#address_literal" },
                 { "include": "#as-import" },
                 {
@@ -197,7 +266,7 @@
                 { "include": "#address_literal" },
                 {
                     "comment": "Name of the imported module",
-                    "match": "\\b(\\w+)\\b",
+                    "match": "\\b([a-zA-Z][A-Za-z_0-9]*)\\b",
                     "name": "entity.name.type.module.move"
                 }
             ]
@@ -213,12 +282,24 @@
             "patterns": [
                 { "include": "#comments" },
                 { "include": "#primitives" },
-                { "include": "#vector" },
                 { "include": "#literals" },
                 {
                     "match": "\\b([\\w_]+)\\b",
                     "name": "constant.other.move"
                 }
+            ]
+        },
+
+        "has_ability": {
+            "name": "meta.has.ability.move",
+            "begin": "(?<=[})])\\s+(has)\\b",
+            "end": ";",
+            "beginCaptures": {
+                "1": { "name": "storage.modifier.type.move" }
+            },
+            "patterns": [
+                { "include": "#comments" },
+                { "include": "#abilities" }
             ]
         },
 
@@ -228,130 +309,124 @@
             "beginCaptures": {
                 "1": { "name": "storage.modifier.type.move" }
             },
-            "end": "(?<=})",
+            "end": "(?<=[};\\)])",
             "patterns": [
                 { "include": "#comments" },
+                { "include": "#escaped_identifier" },
+
+                        { "include": "#has" },
+                        { "include": "#abilities" },
+                        {
+                            "comment": "Struct name (ident)",
+                            "match": "\\b[A-Z][a-zA-Z_0-9]*\\b",
+                            "name": "entity.name.type.struct.move"
+                        },
+                        {
+                            "name": "meta.struct.paren.move",
+                            "comment": "Positional fields",
+                            "begin": "\\(",
+                            "end": "\\)",
+                            "patterns": [
+                                { "include": "#comments" },
+                                { "include": "#capitalized" },
+                                { "include": "#types" }
+                            ]
+                        },
+                        { "include": "#type_param" },
                 {
-                    "name": "meta.struct_def.move",
-                    "comment": "Struct definition",
-                    "begin": "(?<=struct)",
-                    "end": "(?={)",
+                    "name": "meta.struct.paren.move",
+                    "comment": "Simple struct",
+                    "begin": "\\(",
+                    "end": "(?<=[)])",
                     "patterns": [
                         { "include": "#comments" },
-                        {
-                            "comment": "Has Abilities",
-                            "match": "\\b(has)\\b",
-                            "name": "keyword.control.ability.has.move"
-                        },
-                        {
-                            "comment": "Ability",
-                            "match": "\\b(store|key|drop|copy)\\b",
-                            "name": "entity.name.type.ability.move"
-                        },
-                        {
-                            "comment": "Struct name",
-                            "match": "\\b(\\w+)\\b",
-                            "name": "entity.name.type.move"
-                        },
-                        { "include": "#type_param" }
+                        { "include": "#types" }
                     ]
                 },
                 {
-                    "name": "meta.struct_body.move",
+                    "name": "meta.struct.body.move",
                     "comment": "Struct body",
                     "begin": "{",
                     "end": "}",
                     "patterns": [
                         { "include": "#comments" },
                         { "include": "#self_access" },
+                        { "include": "#escaped_identifier" },
                         { "include": "#module_access" },
+                        { "include": "#expr_generic" },
+                        { "include": "#capitalized" },
                         { "include": "#types" }
+                    ]
+                },
+                { "include": "#has_ability" }
+            ]
+        },
+
+        "enum": {
+            "comment": "Enum syntax",
+            "name": "meta.enum.move",
+            "begin": "\\b(enum)\\b",
+            "beginCaptures": {
+                "1": { "name": "keyword.control.enum.move" }
+            },
+            "end": "(?<=})",
+            "patterns": [
+                { "include": "#comments" },
+                { "include": "#escaped_identifier" },
+                { "include": "#type_param" },
+                {
+                    "comment": "Enum name (ident)",
+                    "match": "\\b[A-Z][a-zA-Z_0-9]*\\b",
+                    "name": "entity.name.type.enum.move"
+                },
+                { "include": "#has" },
+                { "include": "#abilities" },
+                {
+                    "name": "meta.enum.definition.move",
+                    "begin": "{",
+                    "end": "}",
+                    "patterns": [
+                        { "include": "#comments" },
+                        {
+                            "name": "meta.enum.tuple.move",
+                            "begin": "\\(",
+                            "end": "\\)",
+                            "patterns": [
+                                { "include": "#comments" },
+                                { "include": "#types" }
+                            ]
+                        },
+                        {
+                            "name": "meta.enum.struct.move",
+                            "begin": "{",
+                            "end": "}",
+                            "patterns": [
+                                { "include": "#comments" },
+                                { "include": "#escaped_identifier" },
+                                { "include": "#types" }
+                            ]
+                        }
                     ]
                 }
             ]
         },
 
-        "native_fun": {
-            "name": "meta.native_fun.move",
-            "comment": "Native function",
-            "begin": "\\b(native)\\b",
-            "beginCaptures": {
-                "1": { "name": "storage.modifier.native.move" }
-            },
-            "end": "(?<=[;}])",
-            "patterns": [
-                { "include": "#comments" },
-                {
-                    "comment": "native public function",
-                    "match": "\\b(public)\\b",
-                    "name": "storage.modifier.public.move"
-                },
-                {
-                    "comment": "native entry function",
-                    "match": "\\b(entry)\\b",
-                    "name": "storage.modifier.entry.move"
-                },
-                { "include": "#fun_signature" }
-            ]
+        "has": {
+            "comment": "Has Abilities",
+            "match": "\\b(has)\\b",
+            "name": "keyword.control.ability.has.move"
         },
 
-        "public_fun": {
-            "name": "meta.public_fun.move",
-            "comment": "Public function",
-            "begin": "\\b(public)\\b",
-            "beginCaptures": {
-                "1": { "name": "storage.modifier.public.move" }
-            },
-            "end": "(?<=[;}])",
-            "patterns": [
-                { "include": "#comments" },
-                {
-                    "comment": "Public native function",
-                    "match": "\\b(native)\\b",
-                    "name": "storage.modifier.native.move"
-                },
-                {
-                    "comment": "Public entry function",
-                    "match": "\\b(entry)\\b",
-                    "name": "storage.modifier.entry.move"
-                },
-                {
-                    "comment": "Script visibility",
-                    "begin": "\\(",
-                    "end": "\\)",
-                    "patterns": [
-                        { "include": "#comments" },
-                        {
-                            "comment": "Friend or Script visibility",
-                            "match": "\\b(script|friend)\\b",
-                            "name": "storage.modifier.public.script.move"
-                        }
-                    ]
-                },
-                { "include": "#fun" }
-            ]
-        },
-
-        "entry_fun": {
-            "name": "meta.entry_fun.move",
-            "comment": "entry fun name() {}",
-            "begin": "\\b(entry)\\b",
-            "beginCaptures": {
-                "1": { "name": "storage.modifier.entry.move" }
-            },
+        "macro": {
+            "comment": "macro fun [ident] {}",
+            "name": "meta.macro.move",
+            "begin": "\\b(macro)\\b",
             "end": "(?<=})",
+            "beginCaptures": {
+                "1": { "name": "keyword.control.macro.move" }
+            },
             "patterns": [
                 { "include": "#comments" },
-                {
-                    "comment": "entry native function",
-                    "match": "\\b(native)\\b",
-                    "name": "storage.modifier.native.move"
-                },
-                {
-                    "comment": "entry public function",
-                    "match": "\\b(public)\\b",
-                    "name": "storage.modifier.public.move"
-                },
                 { "include": "#fun" }
             ]
         },
@@ -359,7 +434,7 @@
         "fun": {
             "patterns": [
                 { "include": "#fun_signature" },
-                { "include": "#fun_body" }
+                { "include": "#block" }
             ]
         },
 
@@ -374,15 +449,17 @@
             "patterns": [
                 { "include": "#comments" },
                 { "include": "#module_access" },
+                { "include": "#capitalized" },
                 { "include": "#types" },
                 { "include": "#mut" },
                 {
                     "name": "meta.function_name.move",
                     "comment": "Function name",
-                    "begin": "(?<=fun)",
+                    "begin": "(?<=\\bfun)",
                     "end": "(?=[<(])",
                     "patterns": [
                         { "include": "#comments" },
+                        { "include": "#escaped_identifier" },
                         {
                             "name": "entity.name.function.move",
                             "match": "\\b(\\w+)\\b"
@@ -398,7 +475,10 @@
                     "patterns": [
                         { "include": "#comments" },
                         { "include": "#self_access" },
+                        { "include": "#expr_generic" },
+                        { "include": "#escaped_identifier" },
                         { "include": "#module_access" },
+                        { "include": "#capitalized" },
                         { "include": "#types" },
                         { "include": "#mut" }
                     ]
@@ -419,41 +499,359 @@
             "patterns": [
                 { "include": "#comments" },
                 { "include": "#phantom" },
+                { "include": "#capitalized" },
                 { "include": "#module_access" },
-                {
-                    "comment": "Trait-like condition",
-                    "match": "\\b(store|drop|key|copy)\\b",
-                    "name": "entity.name.type.kind.move"
-                }
+                { "include": "#abilities" }
             ]
+        },
+
+        "abilities": {
+            "comment": "Ability",
+            "match": "\\b(store|key|drop|copy)\\b",
+            "name": "support.type.ability.move"
         },
 
         "fun_body": {
             "name": "meta.fun_body.move",
             "comment": "Function body",
             "begin": "{",
+            "end": "(?<=})",
+            "patterns": [
+                { "include": "#expr" }
+            ]
+        },
+
+        "ident": {
+            "name": "meta.identifier.move",
+            "match": "\\b([a-zA-Z][A-Z_a-z0-9]*)\\b"
+        },
+
+        "paren": {
+            "name": "meta.paren.move",
+            "begin": "\\(",
+            "end": "\\)",
+            "patterns": [
+                { "include": "#expr" }
+            ]
+        },
+
+        "label": {
+            "comment": "Label",
+            "match": "'[a-z][a-z_0-9]*",
+            "name": "string.quoted.single.label.move"
+        },
+
+        "block": {
+            "name": "meta.block.move",
+            "comment": "Block expression or definition",
+            "begin": "{",
             "end": "}",
             "patterns": [
+                { "include": "#expr" }
+            ]
+        },
+
+        "phantom": {
+            "comment": "Keyword phantom inside type parameters",
+            "match": "\\b(phantom)\\b",
+            "name": "keyword.control.phantom.move"
+        },
+
+        "let": {
+            "comment": "Keyword let",
+            "match": "\\b(let)\\b",
+            "name": "keyword.control.move"
+        },
+
+        "move_copy": {
+            "comment": "Keywords move and copy",
+            "match": "\\b(move|copy)\\b",
+            "name": "variable.language.move"
+        },
+
+        "control": {
+            "comment": "Control flow",
+            "match": "\\b(return|while|loop|if|else|break|continue|abort)\\b",
+            "name": "keyword.control.move"
+        },
+
+        "as-import": {
+            "comment": "Keyword as in import statement; not highlighted",
+            "name": "meta.import.as.move",
+            "match": "\\b(as)\\b"
+        },
+
+        "as": {
+            "comment": "Keyword as (highlighted)",
+            "match": "\\b(as)\\b",
+            "name": "keyword.control.as.move"
+        },
+
+        "mut": {
+            "comment": "Mutable reference and let mut",
+            "match": "\\b(mut)\\b",
+            "name": "storage.modifier.mut.move"
+        },
+
+        "escaped_identifier": {
+            "comment": "Escaped variable",
+            "begin": "`",
+            "end": "`",
+            "name": "variable.language.escaped.move"
+        },
+
+        "resource_methods": {
+            "comment": "Methods to work with resource",
+            "match": "\\b(borrow_global|borrow_global_mut|exists|move_from|move_to_sender|move_to)\\b",
+            "name": "support.function.typed.move"
+        },
+
+        "macro_call": {
+            "name": "meta.macro.call",
+            "comment": "Macro fun call",
+            "match": "(\\b|\\.)([a-z][A-Za-z0-9_]*)!",
+            "captures": {
+                "2": { "name": "support.function.macro.move" }
+            }
+        },
+
+        "vector": {
+            "comment": "vector type",
+            "match": "\\b(vector)\\b",
+            "name": "support.type.vector.move"
+        },
+
+        "self_access": {
+            "name": "meta.self_access.move",
+            "comment": "Use of Self",
+            "match": "\\b(Self)::(\\w+)\\b",
+            "captures": {
+                "1": { "name": "variable.language.self.move" },
+                "2": { "name": "entity.name.function.call.move" }
+            }
+        },
+
+        "module_access": {
+            "name": "meta.module_access.move",
+            "comment": "Use of module type or method",
+            "match": "\\b(\\w+)::(\\w+)\\b",
+            "captures": {
+                "1": { "name": "meta.entity.name.type.accessed.module.move" },
+                "2": { "name": "entity.name.function.call.move" }
+            }
+        },
+
+        "error_const": {
+            "name": "variable.language.error.move",
+            "match": "\\b(E[A-Z][A-Za-z_]*)\\b"
+        },
+
+        "capitalized": {
+            "comment": "MyType - capitalized type name",
+            "name": "entity.name.type.use.move",
+            "match": "\\b([A-Z][a-zA-Z_0-9]*)\\b"
+        },
+
+        "types": {
+            "name": "meta.types.move",
+            "comment": "Built-in types + vector",
+            "patterns": [
+                { "include": "#primitives" },
+                { "include": "#vector" }
+            ]
+        },
+
+        "struct_pack": {
+            "comment": "Struct { field: value... }; identified as generic / ident followed by curly's",
+            "name": "meta.struct.pack.move",
+            "begin": "(?<=[A-Za-z0-9_>])\\s*{",
+            "end": "}",
+            "patterns": [
+                { "include": "#comments" }
+            ]
+        },
+
+        "primitives": {
+            "comment": "Primitive types",
+            "match": "\\b(u8|u16|u32|u64|u128|u256|address|bool|signer)\\b",
+            "name": "support.type.primitives.move"
+        },
+
+        "path_access": {
+            "comment": "<expr>.[ident] access",
+            "name": "meta.path.access.move",
+            "match": "\\.[a-z][_a-z0-9]*\\b"
+        },
+
+        "packed_field": {
+            "comment": "[ident]: ",
+            "name": "meta.struct.field.move",
+            "match": "[a-z][a-z0-9_]+\\s*:\\s*(?=\\s)"
+        },
+
+        "expr_generic": {
+            "comment": "< angle brackets >",
+            "name": "meta.expression.generic.type.move",
+            "begin": "<(?=([\\sa-z_,0-9A-Z<>]+>))",
+            "end": ">",
+            "patterns": [
                 { "include": "#comments" },
+                { "include": "#types" },
+                { "include": "#capitalized" },
+                { "include": "#expr_generic" }
+            ]
+        },
+
+        "method_call": {
+            "comment": "<expr>.[ident]<>?() call",
+            "name": "meta.path.call.move",
+            "match": "\\.([a-z][_a-z0-9]*)(?=[<\\(])",
+            "captures": {
+                "1": { "name": "entity.name.function.call.path.move" }
+            }
+        },
+
+        "local_call": {
+            "comment": "call to a local / imported fun",
+            "name": "entity.name.function.call.local.move",
+            "match": "\\b([a-z][_a-z0-9]*)(?=[<\\(])"
+        },
+
+        "literals": {
+            "comment": "Literals supported in Move",
+            "name": "meta.literal.move",
+            "patterns": [
+                {
+                    "comment": "base16 address literal",
+                    "match": "@0x[A-F0-9a-f]+",
+                    "name": "support.constant.address.base16.move"
+                },
+                {
+                    "comment": "named address literal @[ident]",
+                    "match": "@[a-zA-Z][a-zA-Z_0-9]*",
+                    "name": "support.constant.address.name.move"
+                },
+                {
+                    "comment": "Hex literal",
+                    "name": "constant.numeric.hex.move",
+                    "match": "0x[_a-fA-F0-9]+(?:u(?:8|16|32|64|128|256))?"
+                },
+                {
+                    "comment": "Numeric literal",
+                    "name": "constant.numeric.move",
+                    "match": "(?<!(?:\\w|(?:(?<!\\.)\\.)))[0-9][_0-9]*(?:\\.(?!\\.)(?:[0-9][_0-9]*)?)?(?:[eE][+\\-]?[_0-9]+)?(?:[u](?:8|16|32|64|128|256))?"
+                },
+                {
+                    "comment": "vector ascii bytestring literal",
+                    "name": "meta.vector.literal.ascii.move",
+                    "begin": "\\bb\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "comment": "Special symbol escape",
+                            "name": "constant.character.escape.move",
+                            "match": "\\\\[nrt\\0\"]"
+                        },
+                        {
+                            "comment": "HEX Escape",
+                            "name": "constant.character.escape.hex.move",
+                            "match": "\\\\x[a-fA-F0-9][A-Fa-f0-9]"
+                        },
+                        {
+                            "comment": "ASCII Character",
+                            "name": "string.quoted.double.raw.move",
+                            "match": "[\\x00-\\x7F]"
+                        }
+                    ]
+                },
+                {
+                    "comment": "vector hex literal",
+                    "name": "meta.vector.literal.hex.move",
+                    "begin": "x\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "comment": "vector hex literal",
+                            "name": "constant.character.move",
+                            "match": "[A-Fa-f0-9]+"
+                        }
+                    ]
+                },
+                {
+                    "comment": "bool literal",
+                    "name": "constant.language.boolean.move",
+                    "match": "\\b(?:true|false)\\b"
+                },
+                {
+                    "comment": "vector literal (macro?)",
+                    "name": "meta.vector.literal.macro.move",
+                    "begin": "vector\\[",
+                    "end": "\\]",
+                    "patterns": [
+                        { "include": "#expr" }
+                    ]
+                }
+            ]
+        },
+
+        "expr": {
+            "comment": "Aggregate Expression",
+            "name": "meta.expression.move",
+            "patterns": [
+                { "include": "#comments" },
+                { "include": "#escaped_identifier" },
+                { "include": "#expr_generic" },
+
+                { "include": "#error_const" },
+                { "include": "#packed_field" },
+
                 { "include": "#import" },
                 { "include": "#as" },
                 { "include": "#mut" },
                 { "include": "#let" },
                 { "include": "#types" },
-                { "include": "#assert" },
+
                 { "include": "#literals" },
                 { "include": "#control" },
                 { "include": "#move_copy" },
                 { "include": "#resource_methods" },
                 { "include": "#self_access" },
                 { "include": "#module_access" },
-                { "include": "#fun_call" },
-                { "include": "#spec-fun"},
-                { "include": "#spec-exp"},
-                { "include": "#block" }
+                { "include": "#label" },
 
+                { "include": "#macro_call" },
+                { "include": "#local_call" },
+                { "include": "#method_call" },
+                { "include": "#path_access" },
+
+                {
+                    "name": "keyword.operator.macro.dollar.move",
+                    "match": "\\$(?=[a-z])"
+                },
+                {
+                    "name": "variable.other.meta.move",
+                    "match": "(?<=[$])[a-z][A-Z_0-9a-z]*"
+                },
+
+                {
+                    "comment": "ALL_CONST_CAPS",
+                    "name": "constant.other.move",
+                    "match": "\\b([A-Z][A-Z_]+)\\b"
+                },
+
+                {
+                    "comment": "CustomType",
+                    "name": "entity.name.type.move",
+                    "match": "\\b([A-Z][a-zA-Z_0-9]*)\\b"
+                },
+
+                { "include": "#paren" },
+                { "include": "#block" }
             ]
         },
+
+
+        "=== DEPRECATED_BELOW ===": {},
 
         "fun_call": {
             "name": "meta.fun_call.move",
@@ -477,231 +875,6 @@
             ]
         },
 
-        "block": {
-            "name": "meta.block.move",
-            "comment": "Block expression or definition",
-            "begin": "{",
-            "end": "}",
-            "patterns": [
-                { "include": "#comments" },
-                { "include": "#as" },
-                { "include": "#mut" },
-                { "include": "#let" },
-                { "include": "#types" },
-                { "include": "#assert" },
-                { "include": "#literals" },
-                { "include": "#control" },
-                { "include": "#move_copy" },
-                { "include": "#resource_methods" },
-                { "include": "#module_access" },
-                { "include": "#fun_call" },
-                { "include": "#block" }
-            ]
-        },
-
-        "phantom": {
-            "comment": "Keyword phantom inside type parameters",
-            "match": "\\b(phantom)\\b",
-            "name": "keyword.control.phantom.move"
-        },
-
-
-        "let": {
-            "comment": "Keyword let",
-            "match": "\\b(let)\\b",
-            "name": "keyword.control.move"
-        },
-
-
-
-
-        "move_copy": {
-            "comment": "Keywords move and copy",
-            "match": "\\b(move|copy)\\b",
-            "name": "variable.language.move"
-        },
-
-        "control": {
-            "comment": "Control flow",
-            "match": "\\b(return|while|loop|if|else|break|continue|abort)\\b",
-            "name": "keyword.control.move"
-        },
-
-        "as-import": {
-            "name": "meta.import_as.move",
-            "comment": "Keyword as in import statement",
-            "match": "\\b(as)\\b"
-        },
-
-        "as": {
-            "comment": "Keyword as",
-            "match": "\\b(as)\\b",
-            "name": "keyword.control.move"
-        },
-
-        "mut": {
-            "comment": "&mut reference",
-            "match": "(?<=&)(mut)\\b",
-            "name": "storage.modifier.mut.move"
-        },
-
-        "resource_methods": {
-            "comment": "Methods to work with resource",
-            "match": "\\b(borrow_global|borrow_global_mut|exists|move_from|move_to_sender|move_to)\\b",
-            "name": "support.function.typed.move"
-        },
-
-        "assert": {
-            "comment": "Assert built-in",
-            "match": "\\b(assert)\\b",
-            "name": "support.function.assert.move"
-        },
-
-        "self_access": {
-            "name": "meta.self_access.move",
-            "comment": "Use of Self",
-            "match": "\\b(Self)::(\\w+)\\b",
-            "captures": {
-                "1": { "name": "variable.language.self.move" },
-                "2": { "name": "entity.name.function.call.move" }
-            }
-        },
-
-        "module_access": {
-            "name": "meta.module_access.move",
-            "comment": "Use of module type or method",
-            "match": "\\b(\\w+)::(\\w+)\\b",
-            "captures": {
-                "1": { "name": "meta.entity.name.type.accessed.module.move" },
-                "2": { "name": "entity.name.function.call.move" }
-            }
-        },
-
-        "types": {
-            "name": "meta.types.move",
-            "comment": "Built-in types + vector",
-            "patterns": [
-                { "include": "#primitives" },
-                { "include": "#vector" },
-                {
-                    "comment": "Capitalized type names",
-                    "name": "entity.name.type",
-                    "match": "\\b([A-Z][A-Za-z_]+)\\b"
-                },
-                {
-                    "comment": "All-uppercase const literal",
-                    "match": "\\b([A-Z_]+)\\b",
-                    "name": "constant.other.move"
-                },
-                {
-                    "comment": "Sign",
-                    "match": "\\b(Here)\\b",
-                    "name": "constant.sign.move"
-                }
-            ]
-        },
-
-        "vector": {
-            "name": "meta.vector.move",
-            "begin": "\\b(vector)<",
-            "beginCaptures": {
-                "1": { "name": "support.type.vector.move" }
-            },
-            "end": ">",
-            "patterns": [
-                { "include": "#primitives" },
-                { "include": "#vector" }
-            ]
-            
-        },
-
-
-        "primitives": {
-            "comment": "Primitive types",
-            "match": "\\b(u8|u16|u32|u64|u128|u256|address|bool|signer)\\b",
-            "name": "support.type.primitives.move"
-        },
-
-
-
-        "address_literal": {
-            "patterns": [
-                {
-                    "comment": "16-byte (or shorter) hex address in Libra",
-                    "match": "\\b(0x[A-Fa-f0-9][A-Fa-f0-9]{,31})\\b",
-                    "name": "support.constant.diem.address.move"
-                },
-                {
-                    "comment": "Bech32 with wallet1 prefix - Dfinance format",
-                    "match": "\\b(wallet1\\w{38})",
-                    "name": "support.constant.dfinance.address.move"
-                },
-                {
-                    "comment": "Named address parameter (as build flag)",
-                    "match": "\\s([@]\\w+)\\b",
-                    "name": "support.constant.named.address.move"
-                }
-            ]
-        },
-
-        "literals": {
-            "patterns": [
-                {
-                    "comment": "Hex literal (still to find out)",
-                    "name": "constant.numeric.hex.move",
-                    "match": "0x[_a-fA-F0-9]+(?:[iu](?:8|16|32|64|size))?"
-                },
-                {
-                    "comment": "Numeric literal",
-                    "name": "constant.numeric.move",
-                    "match": "(?<!(?:\\w|(?:(?<!\\.)\\.)))[0-9][_0-9]*(?:\\.(?!\\.)(?:[0-9][_0-9]*)?)?(?:[eE][+\\-]?[_0-9]+)?(?:[u](?:8|64|128|))?"
-                },
-                {
-                    "comment": "Bytearray hex literal",
-                    "match": "\\b(?:h)(\"[a-fA-F0-9]+\")",
-                    "captures": {
-                        "1": { "name": "constant.character.move" }
-                    }
-                },
-                {
-                    "name": "meta.ascii_literal.move",
-                    "comment": "ASCII Bytestring literal",
-                    "begin": "\\bb\"",
-                    "end": "\"",
-                    "patterns": [
-                        {
-                            "comment": "Special symbol escape",
-                            "name": "constant.character.escape.move",
-                            "match": "\\\\[nrt\\0\"]"
-                        },
-                        {
-                            "comment": "HEX Escape",
-                            "name": "constant.character.escape.hex.move",
-                            "match": "\\\\x[a-fA-F0-9][A-Fa-f0-9]"
-                        },
-                        {
-                            "comment": "ASCII Character",
-                            "name": "string.quoted.double.raw.move",
-                            "match": "[\\x00-\\x7F]"
-                        }
-                    ]
-                },
-                {
-                    "name": "meta.hex_literal.move",
-                    "comment": "vector<u8> as hex literal: x",
-                    "match": "x\"([A-F0-9a-f]+)\"",
-                    "captures": {
-                        "1": { "name": "constant.numeric.hex.move" }
-                    }
-                },
-                {
-                    "comment": "Booleans",
-                    "name": "constant.language.boolean.move",
-                    "match": "\\b(?:true|false)\\b"
-                },
-                { "include": "#address_literal" }
-            ]
-        },
 
         "spec_block": {
             "comment": "Spec block",
@@ -722,7 +895,7 @@
         },
 
         "spec_keywords": {
-            "match": "\\b(global|pack|unpack|pragma|native|include|ensures|requires|invariant|apply|aborts_if|modifies|use)\\b",
+            "match": "\\b(global|pack|unpack|pragma|native|include|ensures|requires|invariant|apply|aborts_if|modifies)\\b",
             "name": "keyword.control.move.spec"
         },
 
@@ -740,7 +913,7 @@
                 { "include": "#types" },
                 {
                     "comment": "Function name",
-                    "begin": "(?<=define)",
+                    "begin": "(?<=\\bdefine)",
                     "end": "(?=[(])",
                     "patterns": [
                         { "include": "#comments" },
@@ -767,10 +940,6 @@
             },
             "end": "(?<=[;}])",
             "patterns": [
-                { "include": "#comments" },
-                { "include": "#module_access" },
-                { "include": "#types" },
-                { "include": "#mut" },
                 {
                     "comment": "Spec target",
                     "match": "\\b(module|schema|struct|fun)",
@@ -800,57 +969,10 @@
                         { "include": "#fun_call" },
                         { "include": "#literals" },
                         { "include": "#types" },
-                        { "include": "#let" },
-                        { "include": "#spec" }
+                        { "include": "#let" }
                     ]
                 }
             ]
-        },
-
-        "spec-fun": {
-            "name": "meta.specfun.move",
-            "begin": "\\b(spec){",
-            "beginCaptures": {
-                "1": { "name": "storage.modifier.spec.move" }
-            },
-            "end": "}",
-            "patterns":
-                [
-                    { "include": "#comments" },
-                    { "include": "#spec_block" },
-                    { "include": "#spec_types" },
-                    { "include": "#spec_define" },
-                    { "include": "#spec_keywords" },
-                    { "include": "#control" },
-                    { "include": "#fun_call" },
-                    { "include": "#literals" },
-                    { "include": "#types" },
-                    { "include": "#let" }
-                ]
-            
-        },
-
-        "spec-exp": {
-            "name": "meta.specexp.move",
-            "begin": "\\b(spec)[(]",
-            "beginCaptures": {
-                "1": { "name": "storage.modifier.spec.move" }
-            },
-            "end": "[)]",
-            "patterns":
-                [
-                    { "include": "#comments" },
-                    { "include": "#spec_block" },
-                    { "include": "#spec_types" },
-                    { "include": "#spec_define" },
-                    { "include": "#spec_keywords" },
-                    { "include": "#control" },
-                    { "include": "#fun_call" },
-                    { "include": "#literals" },
-                    { "include": "#types" },
-                    { "include": "#let" }
-                ]
-            
         }
     },
 
@@ -859,7 +981,12 @@
         { "include": "#comments" },
         { "include": "#module" },
         { "include": "#script" },
-        { "include": "#macros" },
-        { "include": "#spec" }
+        { "include": "#attributes" },
+        {
+            "comment": "While experiment",
+            "name": "keyword.control.while.whaaat.move",
+            "begin": "\\b(while)\\b",
+            "while": "[a-z]"
+        }
     ]
 }
