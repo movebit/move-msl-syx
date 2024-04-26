@@ -5,8 +5,8 @@ module 0x0::2024 {
         mut self: &mut Republic<T>,
         a: u64
     ) {
-        break 'loop'
-
+        break "loop"
+        l
         let beep = (
             a.call< u8 >(
                 { @alice },
@@ -49,5 +49,10 @@ module 0x0::2024 {
         b"aaaa"
 
         0x2 @0xAAAA
+
+        match (color) {
+           Color::RGB { red: _, green: _, blue: _ } => true,
+           _ => false,
+        }
     }
 }

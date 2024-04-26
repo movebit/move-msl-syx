@@ -17,9 +17,9 @@ module foo::bar {
     public use fun foo as a::m::X.g4;
 
     public use fun foo as X.g5;
-
+    
     // Types
-
+    struct Wrapper(u64)
     public struct X {  }
 
     public struct Old<T: key + copy + store> has key {
@@ -81,6 +81,16 @@ module foo::bar {
         // TODO: fix precedence of this
         if (true) 1 else 'a: { 2 } + 1;
     }
+
+    let y = loop 'outer: {
+        let _x = loop 'inner: {
+            if (true) {
+                break 'outer 10;
+            } else {
+                break 'inner 20
+            }
+        };
+    };
 
     // Macros
     macro fun ignore(
