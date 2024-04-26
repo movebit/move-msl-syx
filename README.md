@@ -27,4 +27,4 @@ This update highlights support for the new syntax of the Move language.
 - Support `match` keyword and expressions
 - Support named blocks with enhanced control flow operations
 
-[Change log page for version 0.5.0](https://github.com/movebit/move-msl-syx/blob/main/CHANGELOG.md)
+[Change log page for version 0.5.0](https://github.com/movebit/move-msl-syx/blob/dev/CHANGELOG.md)

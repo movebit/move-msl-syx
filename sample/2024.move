@@ -6,7 +6,7 @@ module 0x0::2024 {
         a: u64
     ) {
         break "loop"
-        l
+        
         let beep = (
             a.call< u8 >(
                 { @alice },
@@ -55,4 +55,5 @@ module 0x0::2024 {
            _ => false,
         }
     }
+    
 }
