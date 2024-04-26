@@ -1,9 +1,44 @@
-# Change Log
+# Change log
+This update highlights support for the new syntax of the Move language
 
-All notable changes to the "Move-Msl-Syx" extension will be documented in this file.
+## 1. Use
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\use_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\use_after.png" alt="after" style="width: 150%; height: auto;"> |
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## 2. Struct and Ability
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\struct_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\struct_after.png" alt="after" style="width: 150%; height: auto;"> |
 
-## [Unreleased]
+## 3. macro fun
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\macro_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\macro_after.png" alt="after" style="width: 150%; height: auto;"> |
 
-- Initial release
+## 4. let mut 
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\let_mut_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\let_mut_after.png" alt="after" style="width: 150%; height: auto;"> |
+
+## 5. enum
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\enum_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\enum_after.png" alt="after" style="width: 150%; height: auto;"> |
+
+## 5. block with 'a
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\block_with_value_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\block_with_value_after.png" alt="after" style="width: 150%; height: auto;"> |
+
+## 6. public(package)
+|  |  |  
+| :--: | :--: |  
+| before | after |  
+| <img src="changelog\img\public(package)_before.png" alt="before" style="width: 100%; height: auto;"> | <img src="changelog\img\public(package)_after.png" alt="after" style="width: 150%; height: auto;"> |
