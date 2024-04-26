@@ -1,6 +1,6 @@
 # Move Msl syntax for VSCode
 
-This VSCode extension Based on Damir Shamanaev's Move syntax highligher, but with several bug fixed and features for sui-move-analyzer 2.0.
+This VSCode extension Based on Damir Shamanaev's Move syntax highligher, but with several bug fixed and features for sui-move-analyzer.
 
 ## About
 If you want to know more about the language, see these resources:

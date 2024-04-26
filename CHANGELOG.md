@@ -1,6 +1,10 @@
 # Change log
 This update highlights support for the new syntax of the Move language
 
+version: v0.5.0
+
+datetime: 2024-04-26
+
 ## 1. Use
 |  |  |  
 | :--: | :--: |  
