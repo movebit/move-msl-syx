@@ -1,5 +1,4 @@
 # Move Msl syntax for VSCode
-
 This VSCode extension Based on Damir Shamanaev's Move syntax highligher, but with several bug fixed and features for sui-move-analyzer.
 
 ## About
@@ -11,7 +10,7 @@ If you want to know more about the language, see these resources:
 
 ## Change log
 This update highlights support for the new syntax of the Move language.
-(0.0.2 -> 0.5.0 )
+(v0.0.2 -> v0.5.0)
 - Support `use fun` declarations
 - Support `macro` functions
 - Support `Enums`
