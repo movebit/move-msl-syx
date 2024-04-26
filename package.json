@@ -1,7 +1,7 @@
 {
 	"name": "move-msl-syx",
 	"version": "0.5.0",
-	"description": "dependence of sui-move-analyzer 2.0",
+	"description": "dependence of sui-move-analyzer",
 	"publisher": "Movebit",
 	"displayName": "Move-Msl-Syx",
 	"categories": [
